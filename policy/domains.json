@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "domains": [
+    "chatgpt.com",
+    "openai.com",
+    "oaistatic.com",
+    "oaiusercontent.com",
+    "oaistatsig.com",
+    "openaimerge.com",
+    "figma.com",
+    "figma.site",
+    "figma.app",
+    "figmaweave.com"
+  ],
+  "cidrs": []
+}

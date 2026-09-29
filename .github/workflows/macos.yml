@@ -1,0 +1,34 @@
+name: macOS build
+
+on:
+  push:
+    branches: [main, master]
+    paths: ["macos/**", "policy/**", ".github/workflows/macos.yml"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest # Apple Silicon runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build (swift build + .app bundle)
+        run: cd macos && bash scripts/build.sh
+
+      - name: Install (daemon + launchd)
+        run: cd macos && sudo bash scripts/install.sh
+
+      - name: Verify daemon registered
+        run: |
+          sudo launchctl print system/com.selectivetunnel.daemon | head -15
+          ls -la "/Library/Application Support/SelectiveTunnel/run/"
+
+      - name: Package
+        run: |
+          cd macos/dist
+          zip -r "$GITHUB_WORKSPACE/SelectiveTunnel-macos-arm64.zip" SelectiveTunnel.app selectivetunnel-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SelectiveTunnel-2.0.0-macos-arm64
+          path: SelectiveTunnel-macos-arm64.zip

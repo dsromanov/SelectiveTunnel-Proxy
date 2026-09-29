@@ -1,0 +1,4 @@
+# Place official verified archives here for offline install:
+#   sing-box-1.14.0-windows-amd64.zip
+#   wintun-0.14.1.zip
+# SHA-256 is pinned in the installer. If missing, the installer downloads from the official URLs.
