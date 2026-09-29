@@ -1,0 +1,18 @@
+SelectiveTunnel для macOS (Apple Silicon, macOS 13+)
+
+1. Распаковать архив, в терминале:
+     cd SelectiveTunnel-macOS/macos
+     sudo bash scripts/install.sh
+
+   Если бинарники уже есть в macos/dist/ — сборка пропустится автоматически.
+   Иначе сначала: bash scripts/build.sh (нужен xcode-select --install,
+   полный Xcode не требуется).
+
+2. Открыть /Applications/SelectiveTunnel.app
+   - «Прокси» → ввести логин/пароль → «Сохранить»
+   - «Через прокси» → «Проверить IP»
+   Иконка также висит в меню-баре.
+
+Удаление:
+     sudo bash scripts/uninstall.sh
+   (запускать из каталога macos/ в распакованном архиве)

@@ -23,10 +23,15 @@ jobs:
           sudo launchctl print system/com.selectivetunnel.daemon | head -15
           ls -la "/Library/Application Support/SelectiveTunnel/run/"
 
-      - name: Package
+      - name: Package (полный установочный архив с бинарниками)
         run: |
-          cd macos/dist
-          zip -r "$GITHUB_WORKSPACE/SelectiveTunnel-macos-arm64.zip" SelectiveTunnel.app selectivetunnel-daemon
+          PKG="SelectiveTunnel-macOS"
+          rm -rf "$PKG" && mkdir -p "$PKG"
+          cp -R macos "$PKG/macos"
+          rm -rf "$PKG/macos/.build" "$PKG/macos/.swiftpm"
+          cp -R policy "$PKG/policy"
+          cp "packaging/КАК-УСТАНОВИТЬ.txt" "$PKG/"
+          zip -r SelectiveTunnel-macos-arm64.zip "$PKG"
 
       - uses: actions/upload-artifact@v4
         with:
