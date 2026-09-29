@@ -81,16 +81,25 @@ enum Guards {
     }
 
     /// Интерфейс default-маршрута (en0 и т.п.) — аналог DetectBindInterface.
+    /// Если дефолт держит чужой VPN (utun*/ipsec*/ppp*), идём через физический
+    /// интерфейс — иначе наш коннект к прокси попадёт в чужой туннель.
     static func detectBindInterface() -> String {
         let (code, out) = runCommand("/sbin/route", ["-n", "get", "default"], timeout: 10)
         guard code == 0 else { return "" }
+        var detected = ""
         for line in out.split(separator: "\n") {
             let parts = line.split(separator: ":", maxSplits: 1).map { $0.trimmingCharacters(in: .whitespaces) }
             if parts.count == 2, parts[0] == "interface" {
-                return parts[1]
+                detected = parts[1]
             }
         }
-        return ""
+        guard detected.hasPrefix("utun") || detected.hasPrefix("ipsec") || detected.hasPrefix("ppp")
+        else { return detected }
+        for cand in ["en0", "en5", "en1"] {
+            let (_, info) = runCommand("/sbin/ifconfig", [cand], timeout: 10)
+            if info.contains("status: active") { return cand }
+        }
+        return detected
     }
 
     /// Порт ApplyProxyBypass: если сторонний клиент (Happ и т.п.) включил системный
