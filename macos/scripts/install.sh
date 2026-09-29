@@ -68,6 +68,11 @@ rsync -a --delete "dist/SelectiveTunnel.app" /Applications/
 
 echo "==> launchd"
 install -m 644 -o root -g wheel "Resources/com.selectivetunnel.daemon.plist" "$PLIST"
+# Файлы из скачанного архива имеют xattr com.apple.quarantine — launchd отказывает
+# такому демону (error 155 "quarantined program"). Снимаем карантин со всего.
+xattr -c "$PLIST" 2>/dev/null || true
+xattr -dr com.apple.quarantine "$DATA" 2>/dev/null || true
+xattr -dr com.apple.quarantine "/Applications/SelectiveTunnel.app" 2>/dev/null || true
 plutil -lint "$PLIST"
 launchctl bootout "system/$LABEL" 2>/dev/null || true
 if ! launchctl bootstrap system "$PLIST"; then
