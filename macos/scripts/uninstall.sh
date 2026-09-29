@@ -19,6 +19,9 @@ launchctl bootout "system/$LABEL" 2>/dev/null || launchctl unload "$PLIST" 2>/de
 rm -f "$PLIST"
 pkill -f "$DATA/bin/sing-box" 2>/dev/null || true
 
+echo "==> remove loopback alias"
+/sbin/ifconfig lo0 -alias 127.0.0.53 2>/dev/null || true
+
 echo "==> remove DNS resolvers"
 # Собираем домены из имён файлов, которыми управлял демон (маркер в первой строке).
 domains=()

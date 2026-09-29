@@ -28,8 +28,19 @@ enum Guards {
         "\(ST.resolverDir)/\(domain)"
     }
 
+    /// На macOS lo0 слушает только 127.0.0.1 — без алиаса bind(127.0.0.53:53)
+    /// падает с EADDRNOTAVAIL. Алиас не переживает ребут, ставим при каждом старте.
+    static func ensureLoopbackAlias() {
+        runCommand("/sbin/ifconfig", ["lo0", "alias", ST.dnsListen])
+    }
+
+    static func removeLoopbackAlias() {
+        runCommand("/sbin/ifconfig", ["lo0", "-alias", ST.dnsListen])
+    }
+
     /// Ставит резолверы для доменов политики, убирает устаревшие, которыми мы управляем.
     static func setGuards(_ policy: Policy) throws {
+        ensureLoopbackAlias()
         try FileManager.default.createDirectory(atPath: ST.resolverDir, withIntermediateDirectories: true)
         let managed = readManaged()
         let wanted = Set(policy.domains)
@@ -59,6 +70,7 @@ enum Guards {
             try? FileManager.default.removeItem(atPath: resolverFile(domain))
         }
         writeManaged([])
+        removeLoopbackAlias()
         clearDnsCache()
     }
 
@@ -142,6 +154,7 @@ enum Guards {
                 bind(fd, sa, socklen_t(MemoryLayout<sockaddr_in>.size))
             }
         }
-        return rc != 0
+        // EADDRNOTAVAIL — просто нет алиаса на lo0 (127.0.0.x кроме .1), порт свободен.
+        return rc != 0 && errno == EADDRINUSE
     }
 }
